@@ -31,7 +31,7 @@ public:
     }
     int GetHP()
     {
-        return _hp;
+        return _currenthp;
     }
     void SetAttack(int attack) {
         _attack = attack;
@@ -95,6 +95,7 @@ public:
             _armor = 10;
             _speed = 50;
             _hp = 50;
+            _currenthp = _hp;
         }                  
         if (_type == "Rogue")
         {
@@ -102,6 +103,7 @@ public:
             _armor = 7;
             _speed = 100;
             _hp = 30;
+            _currenthp = _hp;
         }                   
     }
     int GetLevel()
@@ -124,9 +126,11 @@ public:
     {
         return _type;
     }
-    ostream& operator<<(ostream& out) 
+    friend ostream& operator<<(ostream& out, Player& player) 
     {
-        cout << "Игрок: " << _name << "\n HP:" << _hp << "\n Level:" << _level << "\n Exp:" << _exp << "\n Attack:" << _attack << "\n Armor:" << _armor << "\n Speed:" << _speed << endl;
+        return cout << "Игрок: " << player._name << "\n HP:" << player._currenthp << "/" << player._hp << "\n Level:"
+            << player._level << "\n Exp:" << player._exp << "\n Attack:" << player._attack << "\n Armor:" 
+            << player._armor << "\n Speed:" << player._speed << endl;
     }
 };
 class Enemy : Persons {
@@ -141,10 +145,11 @@ public:
 };
 int main()
 {
+    setlocale(LC_ALL, "Russian");
+    Player player("Warrior", "Ilya");
+    cout << player;
 
 
 
-
-
-    std::cout << "Hello World!\n";
+    return 0;
 }
