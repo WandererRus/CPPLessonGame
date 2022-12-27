@@ -62,12 +62,56 @@ class Game {
 
 };
 class Inventory {
+private:
+    Item _weapon;
+    Item _armor;
+    Item _healing;
+    Item _speed;
 public:
-    Inventory() {}
+    Inventory(Item weapon, Item armor, Item healing, Item speed)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            _items[i] = items[i];
+        }
+    }
+    
 };
-
 class Item {
-   /* Двуручная ёлка, пирожки с вишней, санки, шапка-ушанка*/
+private:
+    int _id;
+    string _name;
+    int _attack;
+    int _armor;
+    int _restoreHP;
+    int _increaseSpeed;
+    string _destination;
+public:
+    Item() 
+    {
+        _id = 0;
+        _name = "";
+        _attack = 0;
+        _armor = 0;
+        _restoreHP = 0;
+        _increaseSpeed = 0;
+        _destination = "";
+    }
+    Item(int id, string name, int attack, int armor, int restoreHP, int increaseSpeed, string destination)
+    {
+        _id = id;
+        _name = name;
+        _attack = attack;
+        _armor = armor;
+        _restoreHP = restoreHP;
+        _increaseSpeed = increaseSpeed;
+        _destination = destination;
+    }    
+    Item& operator[](int index) 
+    {
+        return 
+    }
+    
 };
 
 class Dialog : TextAction {
@@ -116,6 +160,11 @@ public:
         {
             _exp = _exp - _level * 1000;
             _level++;
+            _attack++;
+            _armor++;
+            _speed += 5;
+            _currenthp += 5;
+            _hp += 5;
         }
     }
     int GetExp()
@@ -146,9 +195,19 @@ public:
 int main()
 {
     setlocale(LC_ALL, "Russian");
+
+    Item twoHandedSpruce(1, "Двуручная ель", 4, 0, 0, -15, "weapon");
+    Item cherryPie(2, "Пирожок с вишней", 0, 0, 5, 0, "heal");
+    Item sled(3, "Санки", 0, 0, 0, +10, "maunt");
+    Item USSRHat(4, "Шапка-ушанка", 0, 3, 0, 0, "armor");
+    Item allItems[4];
+    allItems[0] = twoHandedSpruce;
+    allItems[1] = cherryPie;
+    allItems[2] = sled;
+    allItems[3] = USSRHat;
     Player player("Warrior", "Ilya");
     cout << player;
-
+    Inventory inventory(allItems);
 
 
     return 0;
