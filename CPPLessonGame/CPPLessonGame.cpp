@@ -5,7 +5,113 @@
 #include <string>
 
 using namespace std;
+class Item {
+private:
+    int _id;
+    string _name;
+    int _attack;
+    int _armor;
+    int _restoreHP;
+    int _increaseSpeed;
+    string _destination;
+public:
+    Item()
+    {
+        _id = 0;
+        _name = "";
+        _attack = 0;
+        _armor = 0;
+        _restoreHP = 0;
+        _increaseSpeed = 0;
+        _destination = "";
+    }
+    Item(int id, string name, int attack, int armor, int restoreHP, int increaseSpeed, string destination)
+    {
+        _id = id;
+        _name = name;
+        _attack = attack;
+        _armor = armor;
+        _restoreHP = restoreHP;
+        _increaseSpeed = increaseSpeed;
+        _destination = destination;
+    }
+    string getDesination()
+    {
+        return _destination;
+    }
+    friend ostream& operator<<(ostream& out, Item item)
+    {
+        if (item._id > 0)
+        { 
+            string ItemOut = item._name + "\n Тип предмета: " + item._destination;
+            if (item._attack > 0)
+            {
+                ItemOut += "\n Атака:" + to_string(item._attack);
+            }
+            if (item._armor > 0)
+            {
+                ItemOut += "\n  Броня: " + to_string(item.GetArmor());
+            }
+            if (item._restoreHP > 0)
+            {
+                ItemOut += "\n Восстановление здоровья:" + to_string(item._restoreHP);
+            }
+            if (item._increaseSpeed > 0)
+            {
+                ItemOut += "\n Увеличение скорости:" + to_string(item._increaseSpeed);
+            }
+            out << ItemOut << endl;
+            return out;
+        }
+        return out;
+    }
 
+    int GetArmor()
+    {
+        if (getDesination() == "armor")
+            return _armor;
+    }
+};
+class Inventory {
+private:
+    Item _weapon;
+    Item _armor;
+    Item _healing;
+    Item _speed;
+public:
+    Inventory() {}
+
+    void setWeaponItem(Item item)
+    {
+        if (item.getDesination() == "weapon")
+            _weapon = item;
+    }
+    void setArmorItem(Item item)
+    {
+        if (item.getDesination() == "armor")
+            _armor = item;
+    }
+    int getArmorItem()
+    {
+        return _armor.GetArmor();
+    }
+    void setHealingItem(Item item)
+    {
+        if (item.getDesination() == "heal")
+            _healing = item;
+    }
+    void setSpeedItem(Item item)
+    {
+        if (item.getDesination() == "maunt")
+            _speed = item;
+    }
+
+    friend ostream& operator<<(ostream& out, Inventory inv)
+    {
+        return out << "\n Содержимое инвентаря: \n " << inv._weapon << inv._armor << inv._healing << inv._speed << endl;
+
+    }
+};
 class Persons {
 protected: 
     int _hp;
@@ -14,7 +120,7 @@ protected:
     int _speed;
     int _currenthp;
     string _name = "";
-    //Inventory _inventory;
+    Inventory _inventory;
 public: 
     Persons(int hp = 0, int attack = 0, int armor = 0, int speed = 0)
     {
@@ -61,58 +167,8 @@ class TextAction {
 class Game {
 
 };
-class Inventory {
-private:
-    Item _weapon;
-    Item _armor;
-    Item _healing;
-    Item _speed;
-public:
-    Inventory(Item weapon, Item armor, Item healing, Item speed)
-    {
-        for (int i = 0; i < 4; i++)
-        {
-            _items[i] = items[i];
-        }
-    }
-    
-};
-class Item {
-private:
-    int _id;
-    string _name;
-    int _attack;
-    int _armor;
-    int _restoreHP;
-    int _increaseSpeed;
-    string _destination;
-public:
-    Item() 
-    {
-        _id = 0;
-        _name = "";
-        _attack = 0;
-        _armor = 0;
-        _restoreHP = 0;
-        _increaseSpeed = 0;
-        _destination = "";
-    }
-    Item(int id, string name, int attack, int armor, int restoreHP, int increaseSpeed, string destination)
-    {
-        _id = id;
-        _name = name;
-        _attack = attack;
-        _armor = armor;
-        _restoreHP = restoreHP;
-        _increaseSpeed = increaseSpeed;
-        _destination = destination;
-    }    
-    Item& operator[](int index) 
-    {
-        return 
-    }
-    
-};
+
+
 
 class Dialog : TextAction {
 
@@ -177,9 +233,25 @@ public:
     }
     friend ostream& operator<<(ostream& out, Player& player) 
     {
-        return cout << "Игрок: " << player._name << "\n HP:" << player._currenthp << "/" << player._hp << "\n Level:"
-            << player._level << "\n Exp:" << player._exp << "\n Attack:" << player._attack << "\n Armor:" 
-            << player._armor << "\n Speed:" << player._speed << endl;
+        out << "Игрок: " << player._name;
+        out << "\n HP:" << player._currenthp << "/" << player._hp;
+        out << "\n Level:" << player._level;
+        out << "\n Exp:" << player._exp;
+        out << "\n Attack:" << player._attack;
+        out << "\n Armor:" << player._armor;
+        if (player._inventory.getArmorItem() > 0)
+        {
+            out << "(" + to_string(player._inventory.getArmorItem() + player._armor) + ")";
+
+        }
+        out << "\n Speed:" << player._speed;
+        out << player._inventory << endl;
+        return out;
+    }
+
+    void WearArmor(Item item) 
+    {
+        _inventory.setArmorItem(item);
     }
 };
 class Enemy : Persons {
@@ -200,14 +272,9 @@ int main()
     Item cherryPie(2, "Пирожок с вишней", 0, 0, 5, 0, "heal");
     Item sled(3, "Санки", 0, 0, 0, +10, "maunt");
     Item USSRHat(4, "Шапка-ушанка", 0, 3, 0, 0, "armor");
-    Item allItems[4];
-    allItems[0] = twoHandedSpruce;
-    allItems[1] = cherryPie;
-    allItems[2] = sled;
-    allItems[3] = USSRHat;
     Player player("Warrior", "Ilya");
+    player.WearArmor(USSRHat);
     cout << player;
-    Inventory inventory(allItems);
 
 
     return 0;
