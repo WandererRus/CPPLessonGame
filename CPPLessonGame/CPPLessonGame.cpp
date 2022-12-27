@@ -71,6 +71,16 @@ public:
         if (getDesination() == "armor")
             return _armor;
     }
+    int GetSpeed()
+    {
+        if (getDesination() == "maunt")
+            return _armor;
+    }
+    int GetWeapon()
+    {
+        if (getDesination() == "weapon")
+            return _armor;
+    }
 };
 class Inventory {
 private:
@@ -85,6 +95,10 @@ public:
     {
         if (item.getDesination() == "weapon")
             _weapon = item;
+    }
+    int getWeaponItem()
+    {
+        return _weapon.GetWeapon();
     }
     void setArmorItem(Item item)
     {
@@ -105,7 +119,10 @@ public:
         if (item.getDesination() == "maunt")
             _speed = item;
     }
-
+    int getSpeedItem()
+    {
+        return _speed.GetSpeed();
+    }
     friend ostream& operator<<(ostream& out, Inventory inv)
     {
         return out << "\n Содержимое инвентаря: \n " << inv._weapon << inv._armor << inv._healing << inv._speed << endl;
@@ -238,6 +255,11 @@ public:
         out << "\n Level:" << player._level;
         out << "\n Exp:" << player._exp;
         out << "\n Attack:" << player._attack;
+        if (player._inventory.getWeaponItem() > 0)
+        {
+            out << "(" + to_string(player._inventory.getWeaponItem() + player._attack) + ")";
+
+        }
         out << "\n Armor:" << player._armor;
         if (player._inventory.getArmorItem() > 0)
         {
@@ -245,6 +267,11 @@ public:
 
         }
         out << "\n Speed:" << player._speed;
+        if (player._inventory.getSpeedItem() > 0)
+        {
+            out << "(" + to_string(player._inventory.getSpeedItem() + player._speed) + ")";
+
+        }
         out << player._inventory << endl;
         return out;
     }
@@ -252,6 +279,18 @@ public:
     void WearArmor(Item item) 
     {
         _inventory.setArmorItem(item);
+    }
+    void WearWeapon(Item item)
+    {
+        _inventory.setWeaponItem(item);
+    }
+    void HealOnBelt(Item item)
+    {
+        _inventory.setHealingItem(item);
+    }
+    void WearSpeed(Item item)
+    {
+        _inventory.setSpeedItem(item);
     }
 };
 class Enemy : Persons {
@@ -274,6 +313,9 @@ int main()
     Item USSRHat(4, "Шапка-ушанка", 0, 3, 0, 0, "armor");
     Player player("Warrior", "Ilya");
     player.WearArmor(USSRHat);
+    player.WearWeapon(twoHandedSpruce);
+    player.HealOnBelt(cherryPie);
+    player.WearSpeed(sled);
     cout << player;
 
 
