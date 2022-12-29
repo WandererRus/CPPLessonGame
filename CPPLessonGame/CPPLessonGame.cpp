@@ -74,12 +74,12 @@ public:
     int GetSpeed()
     {
         if (getDesination() == "maunt")
-            return _armor;
+            return _increaseSpeed;
     }
     int GetWeapon()
     {
         if (getDesination() == "weapon")
-            return _armor;
+            return _attack;
     }
 };
 class Inventory {
@@ -178,22 +178,26 @@ public:
         return _speed;
     }
 };
-class TextAction {
 
+class Dialog  {
+    private: 
+        int _location = 0;
+        int _sequencing = 0;
+        string _txt;
+    public :
+        Dialog(string txt)
+        {
+            /*_location = location;
+            _sequencing = sequencing;*/
+            _txt = txt;
+        }
+        void print()
+        {
+            cout << _txt << endl;
+        }
 };
-class Game {
 
-};
-
-
-
-class Dialog : TextAction {
-
-};
-class Action : TextAction {
-
-};
-class Command : TextAction {
+class Command {
 
 };
 class Player : Persons {
@@ -201,7 +205,9 @@ private:
     int _level = 1;
     int _exp = 0;
     string _type = "";
+    int _countFlush = 0;
 public:
+    Player() {}
     Player(string type, string name)  
     {        
         _name = name;
@@ -248,6 +254,47 @@ public:
     {
         return _type;
     }
+    int GetAttack()
+    {
+        return _attack;
+    }
+    int GetArmor()
+    {
+        return _armor;
+    }
+    int GetSpeed()
+    {
+        return _speed;
+    }
+    void IncreaseCountFlush()
+    {
+        _countFlush++;
+    }
+    int GetCountFlush()
+    {
+        return _countFlush;
+    }
+    void ResetCountFlush()
+    {
+        _countFlush = 0;
+    }
+    void SetHP(int hp)
+    {
+        if (hp <= 0)
+        {
+            cout << "\nВам нанесли " + to_string(hp * -1) + "единиц урона"<< endl;            
+        }
+        if (hp > 0)
+        {
+            cout << "\nВы вылечили " + to_string(hp) + "единиц жизни" << endl;
+        }
+        cout << "\nВаше здоровье " + to_string(_currenthp) + "/" + to_string(_hp) << endl;
+        _currenthp += hp;
+    }
+    int GetCurrentHP()
+    {
+        return _currenthp;
+    }
     friend ostream& operator<<(ostream& out, Player& player) 
     {
         out << "Игрок: " << player._name;
@@ -292,32 +339,222 @@ public:
     {
         _inventory.setSpeedItem(item);
     }
+
 };
 class Enemy : Persons {
 private:
-    int _giveExp;
+    int _giveExp = 0;
 public:
-    Enemy() 
+    Enemy() {}
+    Enemy(int giveExp) 
     {
-
+        _giveExp = giveExp;
+    }
+    Enemy(int hp, int attack, int armor, int speed, int giveExp, string name)
+    {
+        _giveExp = giveExp;
+        _hp = hp;
+        _attack = attack;
+        _armor = armor;
+        _speed = speed;
+        _currenthp = hp;
+        _name = name;
+    }
+    int GetAttack()
+    {
+        return _attack;
+    }
+    int GetArmor()
+    {
+        return _armor;
+    }
+    int GetSpeed() 
+    {
+        return _speed;
+    }
+    int GetEXP()
+    {
+        return _giveExp;
+    }
+    int GetCurrentHP()
+    {
+        return _currenthp;
+    }
+    void SetHP(int hp)
+    {
+        if (hp <= 0)
+        {
+            cout << "\nВы нанесли " + to_string(hp * -1) + "единиц урона" + _name << endl;
+        }
+        if (hp > 0)
+        {
+            cout << "\nВраг вылечил " + to_string(hp) + "единиц жизни" << endl;
+        }
+        cout << "\nЗдоровье врага " + to_string(_currenthp) + "/" + to_string(_hp) << endl;
+        _currenthp += hp;
     }
     /* Дед мороз, эльфы */
+};
+class Action {
+private:
+    Player _player;
+    Enemy _enemy;
+public:
+    Action(Player& player, Enemy& enemy) 
+    {
+        _player = player;
+        _enemy = enemy;
+    }
+    void BattleAction() 
+    {
+        int turn = 0;
+        if (_player.GetSpeed() < _enemy.GetSpeed())
+        {
+            turn = 1;
+        }
+        string turntxt = turn ? "враг" : "игрок";
+        cout << "Первым ходит " + turntxt;
+        while (_player.GetCurrentHP() >= 0 && _enemy.GetCurrentHP() >= 0)
+        {
+            double damage = 1;
+            if (turn)
+            {
+                if (_player.GetArmor() > _enemy.GetAttack())
+                {
+                    damage = _enemy.GetAttack() * 0.5;
+                }
+                if (_player.GetArmor() == _enemy.GetAttack())
+                {
+                    damage = _enemy.GetAttack() * 0.75;
+                }
+                if (_player.GetArmor() < _enemy.GetAttack())
+                {
+                    damage = _enemy.GetAttack();
+                }
+                _player.SetHP(0 - damage);
+                turn = 0;
+            }
+            else
+            {
+                if (_enemy.GetArmor() > _player.GetAttack())
+                {
+                    damage = _player.GetAttack() * 0.5;
+                }
+                if (_enemy.GetArmor() == _player.GetAttack())
+                {
+                    damage = _player.GetAttack() * 0.75;
+                }
+                if (_enemy.GetArmor() < _player.GetAttack())
+                {
+                    damage = _player.GetAttack();
+                }
+                _enemy.SetHP(0 - damage);
+                turn = 0;
+                ++turn;
+            }
+        }
+    }
+    bool FlushAction() 
+    {
+        double playerLuck = rand() % 12 + 8;
+        double enemyLuck = rand() % 12 + 8;
+        if (_player.GetSpeed() * playerLuck / 10 > _enemy.GetSpeed() * enemyLuck / 10)
+        {
+            _player.IncreaseCountFlush();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    void GetFlushActionExp()
+    {
+        _player.SetExp(_enemy.GetEXP()/2);
+    }
+    int GetFlushActionHPDamage()
+    {
+        int damage = rand() % _player.GetCountFlush() + 1;
+        _player.SetHP( 0-damage);
+        return damage;
+    }
+    
+
+};
+class Game {
+    public:
+        Game() {}
+
+        Player NewGame() 
+        {
+            bool startgame = false;
+            while(!startgame)
+            { 
+                cout << "Для начала игры создайте персонажа." << endl;
+                cout << "Можно создать воина или разбойника." << endl;
+                cout << "Воин более стойкий к урону и имеет больше жизней, но обладает слабой атакой и маленькой скоростью." << endl;
+                cout << "Разбойник менее стойкий к урону и имеет меньше жизней, но обладает сильной атакой и большой скоростью." << endl;
+                cout << "Нажмите W для выбора воина и R для выбора разбойника" << endl;
+                char type = ' ';
+                cin >> type;
+                string name = "";
+                cout << "Введите имя персонажа" << endl;
+                cin >> name;
+                if (type == 'W' || type == 'w')
+                {
+                    startgame = true;
+                    return Player("Warrior", name);
+
+                }
+                else if (type == 'R' || type == 'r')
+                {
+                    startgame = true;
+                    return Player("Rogue", name);
+                }
+            }
+            
+        }
 };
 int main()
 {
     setlocale(LC_ALL, "Russian");
-
+    Player player;
+    Game game;
+    player = game.NewGame();
+    char answerPlayer = ' ';
+    cout << player;
+    Dialog dialog1("Здравствуй игрок. Добро пожаловать в Новогодний мир. \nВ него пришла беда и только ты, избранный, можешь помочь его жителям и вернуть Новый Год.");
+    Dialog dialog2("Как только вы прочитали это сообщение, вы увидели садового гнома, несущегося к вам с оскаленным лицом. \nВы понимаете, что сейчас вам предстоит битва. Хотите попытаться смыться или вступить в сражение? \nY- смыться, N - сражаться.");
+    dialog1.print();
+    dialog2.print();
+    Enemy elf(20, 4, 4, 35, 100, "Эльф-рядовой");
+    Action action(player, elf);
+    cin >> answerPlayer;    
+    if (answerPlayer == 'Y')
+    {
+        if (action.FlushAction())
+        {
+            action.GetFlushActionExp();
+            
+            cout << "Вы успешно смылись. За смывку вы получаете половину опыта вашего врага и теряете " 
+                << action.GetFlushActionHPDamage() << "здоровья. Помните, чем больше смывок без битв - тем больше будет урон." << endl;
+        }
+        else
+        {
+            action.BattleAction();
+        }
+    }
+    else
+    {
+        action.BattleAction();
+    }
+    /*
     Item twoHandedSpruce(1, "Двуручная ель", 4, 0, 0, -15, "weapon");
     Item cherryPie(2, "Пирожок с вишней", 0, 0, 5, 0, "heal");
     Item sled(3, "Санки", 0, 0, 0, +10, "maunt");
-    Item USSRHat(4, "Шапка-ушанка", 0, 3, 0, 0, "armor");
-    Player player("Warrior", "Ilya");
-    player.WearArmor(USSRHat);
-    player.WearWeapon(twoHandedSpruce);
-    player.HealOnBelt(cherryPie);
-    player.WearSpeed(sled);
-    cout << player;
-
+    Item USSRHat(4, "Шапка-ушанка", 0, 3, 0, 0, "armor");   
+   
+    cout << player;*/
 
     return 0;
 }
